@@ -3,6 +3,9 @@ on: [push]
 jobs:
   test:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.ref }}-ci
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v2
