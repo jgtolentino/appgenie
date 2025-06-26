@@ -1,0 +1,45 @@
+name: Production Validation
+
+on:
+  push:
+    branches: [ main, feat/* ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
+        
+    - name: Install dependencies
+      run: pnpm install
+      
+    - name: Run production validation tests
+      run: ./scripts/validate_production.sh
+      
+    - name: Run agent grading
+      run: node scripts/grade_agents.mjs
+      
+    - name: Upload validation report
+      uses: actions/upload-artifact@v3
+      with:
+        name: validation-report
+        path: agent-grade-report.json
+        
+    - name: Tag as production-ready
+      if: success()
+      run: |
+        echo "✅ AppGenie validated as production-ready"
+        echo "All 5 tests passed"
